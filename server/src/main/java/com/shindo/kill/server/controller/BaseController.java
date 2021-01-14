@@ -1,6 +1,8 @@
 package com.shindo.kill.server.controller;
 
 import com.google.common.base.Strings;
+import com.shindo.kill.api.enums.StatusCode;
+import com.shindo.kill.api.response.BaseResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -34,6 +36,12 @@ public class BaseController {
 		return "welcome";
 	}
 
+	/**
+	 * 通过@ResponseBody直接响应数据，不做页面跳转
+	 *
+	 * @param name
+	 * @return
+	 */
 	@RequestMapping(value = "/data", method = RequestMethod.GET)
 	@ResponseBody
 	public String data(String name) {
@@ -41,6 +49,23 @@ public class BaseController {
 			name = "这是welcome！";
 		}
 		return name;
+	}
+
+	/**
+	 * 组装正规的响应结构体，chrome浏览器可以安排FeHelper插件
+	 *
+	 * @param name
+	 * @return
+	 */
+	@RequestMapping(value = "/response", method = RequestMethod.GET)
+	@ResponseBody
+	public BaseResponse response(String name) {
+		BaseResponse baseResponse = new BaseResponse(StatusCode.Success);
+		if (Strings.isNullOrEmpty(name)) {
+			name = "这是welcome！";
+		}
+		baseResponse.setData(name);
+		return baseResponse;
 	}
 
 }
