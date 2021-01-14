@@ -14,7 +14,7 @@ import org.springframework.context.annotation.ImportResource;
  */
 @SpringBootApplication
 @ImportResource(value = {"classpath:spring/spring-jdbc.xml"})
-@MapperScan(basePackages = "com.debug.kill.model.mapper")
+@MapperScan(basePackages = "com.shindo.kill.model.mapper")
 public class MainApplication extends SpringBootServletInitializer {
 
 	@Override

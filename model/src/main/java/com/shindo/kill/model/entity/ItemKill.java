@@ -19,10 +19,10 @@ public class ItemKill {
 	private Integer total;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	private Data startTime;
+	private Date startTime;
 
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	private Data endTime;
+	private Date endTime;
 
 	private Byte isActive;
 

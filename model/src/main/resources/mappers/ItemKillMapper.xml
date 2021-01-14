@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.debug.kill.model.mapper.ItemKillMapper">
+<mapper namespace="com.shindo.kill.model.mapper.ItemKillMapper">
   <resultMap id="BaseResultMap" type="com.shindo.kill.model.entity.ItemKill">
     <id column="id" property="id" jdbcType="INTEGER"/>
     <result column="item_id" property="itemId" jdbcType="INTEGER"/>
@@ -32,50 +32,50 @@
   </select>
 
   <!--获取秒杀详情-->
-  <select id="selectById" resultType="com.shindo.kill.model.entity.ItemKill">
-    SELECT
-      a.*,
-      b.name AS itemName,
-      (
-        CASE WHEN (now() BETWEEN a.start_time AND a.end_time AND a.total > 0)
-          THEN 1
-        ELSE 0
-        END
-      )      AS canKill
-    FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
-    WHERE a.is_active = 1 AND a.id= #{id}
-  </select>
+  <!--  <select id="selectById" resultType="com.shindo.kill.model.entity.ItemKill">
+      SELECT
+        a.*,
+        b.name AS itemName,
+        (
+          CASE WHEN (now() BETWEEN a.start_time AND a.end_time AND a.total > 0)
+            THEN 1
+          ELSE 0
+          END
+        )      AS canKill
+      FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
+      WHERE a.is_active = 1 AND a.id= #{id}
+    </select>-->
 
 
   <!--抢购商品，剩余数量减一-->
-  <update id="updateKillItem">
-    UPDATE item_kill
-    SET total = total - 1
-    WHERE
-        id = #{killId}
-  </update>
+  <!--  <update id="updateKillItem">
+      UPDATE item_kill
+      SET total = total - 1
+      WHERE
+          id = #{killId}
+    </update>-->
 
 
   <!--获取秒杀详情V2-->
-  <select id="selectByIdV2" resultType="com.shindo.kill.model.entity.ItemKill">
-    SELECT
-      a.*,
-      b.name AS itemName,
-      (CASE WHEN (now() BETWEEN a.start_time AND a.end_time)
-        THEN 1
-       ELSE 0
-       END)  AS canKill
-    FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
-    WHERE a.is_active = 1 AND a.id =#{id} AND a.total>0
-  </select>
+  <!--  <select id="selectByIdV2" resultType="com.shindo.kill.model.entity.ItemKill">
+      SELECT
+        a.*,
+        b.name AS itemName,
+        (CASE WHEN (now() BETWEEN a.start_time AND a.end_time)
+          THEN 1
+         ELSE 0
+         END)  AS canKill
+      FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
+      WHERE a.is_active = 1 AND a.id =#{id} AND a.total>0
+    </select>-->
 
 
   <!--抢购商品，剩余数量减一-->
-  <update id="updateKillItemV2">
-    UPDATE item_kill
-    SET total = total - 1
-    WHERE id = #{killId} AND total>0
-  </update>
+  <!--  <update id="updateKillItemV2">
+      UPDATE item_kill
+      SET total = total - 1
+      WHERE id = #{killId} AND total>0
+    </update>-->
 
 </mapper>
 
