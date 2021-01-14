@@ -12,9 +12,9 @@
     <title>首页</title>
 </head>
 <body>
-<h1>这是欢迎页面</h1>
+<h1>这是kill欢迎页面</h1>
 <br/>
-    ${name}
-    <%--<c:out value="${name}"></c:out>--%>
+${name} <%--jstl 的取值方式--%>
+<%--<c:out value="${name}"></c:out>--%>
 </body>
 </html>
