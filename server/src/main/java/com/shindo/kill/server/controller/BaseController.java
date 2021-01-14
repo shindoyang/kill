@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @Description:
@@ -31,6 +33,14 @@ public class BaseController {
 		modelMap.put("name", name);
 		return "welcome";
 	}
-	
+
+	@RequestMapping(value = "/data", method = RequestMethod.GET)
+	@ResponseBody
+	public String data(String name) {
+		if (Strings.isNullOrEmpty(name)) {
+			name = "这是welcome！";
+		}
+		return name;
+	}
 
 }
