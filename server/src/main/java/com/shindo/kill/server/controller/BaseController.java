@@ -68,4 +68,9 @@ public class BaseController {
 		return baseResponse;
 	}
 
+	@RequestMapping(value = "/error", method = RequestMethod.GET)
+	public String error() {
+		return "error";
+	}
+
 }
