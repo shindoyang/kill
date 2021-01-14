@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shindo.kill.model.mapper.ItemKillSuccessMapper">
+  <resultMap id="BaseResultMap" type="com.shindo.kill.model.entity.ItemKillSuccess">
+    <id column="code" jdbcType="VARCHAR" property="code" />
+    <result column="item_id" jdbcType="INTEGER" property="itemId" />
+    <result column="kill_id" jdbcType="INTEGER" property="killId" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    code, item_id, kill_id, user_id, `status`, create_time
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from item_kill_success
+    where code = #{code,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+    delete from item_kill_success
+    where code = #{code,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" keyColumn="code" keyProperty="code" parameterType="com.shindo.kill.model.entity.ItemKillSuccess" useGeneratedKeys="true">
+    insert into item_kill_success (item_id, kill_id, user_id, 
+      `status`, create_time)
+    values (#{itemId,jdbcType=INTEGER}, #{killId,jdbcType=INTEGER}, #{userId,jdbcType=VARCHAR}, 
+      #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" keyColumn="code" keyProperty="code" parameterType="com.shindo.kill.model.entity.ItemKillSuccess" useGeneratedKeys="true">
+    insert into item_kill_success
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="itemId != null">
+        item_id,
+      </if>
+      <if test="killId != null">
+        kill_id,
+      </if>
+      <if test="userId != null">
+        user_id,
+      </if>
+      <if test="status != null">
+        `status`,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="itemId != null">
+        #{itemId,jdbcType=INTEGER},
+      </if>
+      <if test="killId != null">
+        #{killId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.shindo.kill.model.entity.ItemKillSuccess">
+    update item_kill_success
+    <set>
+      <if test="itemId != null">
+        item_id = #{itemId,jdbcType=INTEGER},
+      </if>
+      <if test="killId != null">
+        kill_id = #{killId,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null">
+        user_id = #{userId,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where code = #{code,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.shindo.kill.model.entity.ItemKillSuccess">
+    update item_kill_success
+    set item_id = #{itemId,jdbcType=INTEGER},
+      kill_id = #{killId,jdbcType=INTEGER},
+      user_id = #{userId,jdbcType=VARCHAR},
+      `status` = #{status,jdbcType=TINYINT},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where code = #{code,jdbcType=VARCHAR}
+  </update>
+</mapper>
