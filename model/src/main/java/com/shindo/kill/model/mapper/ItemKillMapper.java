@@ -1,6 +1,7 @@
 package com.shindo.kill.model.mapper;
 
 import com.shindo.kill.model.entity.ItemKill;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -11,4 +12,6 @@ import java.util.List;
  */
 public interface ItemKillMapper {
 	List<ItemKill> selectAll();
+
+	ItemKill selectById(@Param("id") Integer id);
 }

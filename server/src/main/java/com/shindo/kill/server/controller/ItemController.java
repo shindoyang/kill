@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -42,5 +43,27 @@ public class ItemController {
 			return "redirect:/base/error";
 		}
 		return "list";
+	}
+
+	/**
+	 * 获取待秒杀商品的详情
+	 *
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping(value = prefix + "/detail/{id}", method = RequestMethod.GET)
+	public String detail(@PathVariable Integer id, ModelMap modelMap) {
+		if (null == id || id < 0) {
+			return "redirect:/base/error";
+		}
+		try {
+			ItemKill detail = itemService.getKillDetail(id);
+			modelMap.put("detail", detail);
+		} catch (Exception e) {
+			log.error("获取待秒杀商品详情-发生异常： id = {}", id, e.fillInStackTrace());
+			return "redirect:/base/error";
+		}
+
+		return "info";
 	}
 }

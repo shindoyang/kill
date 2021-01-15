@@ -32,7 +32,7 @@
   </select>
 
   <!--获取秒杀详情-->
-  <!--  <select id="selectById" resultType="com.shindo.kill.model.entity.ItemKill">
+    <select id="selectById" resultType="com.shindo.kill.model.entity.ItemKill">
       SELECT
         a.*,
         b.name AS itemName,
@@ -44,7 +44,7 @@
         )      AS canKill
       FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
       WHERE a.is_active = 1 AND a.id= #{id}
-    </select>-->
+    </select>
 
 
   <!--抢购商品，剩余数量减一-->
