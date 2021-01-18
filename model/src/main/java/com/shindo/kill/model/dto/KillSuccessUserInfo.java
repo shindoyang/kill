@@ -1,6 +1,7 @@
 package com.shindo.kill.model.dto;
 
 import com.shindo.kill.model.entity.ItemKillSuccess;
+import lombok.Data;
 
 import java.io.Serializable;
 
@@ -9,6 +10,7 @@ import java.io.Serializable;
  * @Author: 杨耿
  * @Date: Create in 2021/1/14
  */
+@Data
 public class KillSuccessUserInfo extends ItemKillSuccess implements Serializable {
 	private String userName;
 

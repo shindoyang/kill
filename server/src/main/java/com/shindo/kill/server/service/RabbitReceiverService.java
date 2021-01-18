@@ -33,7 +33,7 @@ public class RabbitReceiverService {
 	@RabbitListener(queues = {"${mq.kill.item.success.email.queue}"}, containerFactory = "singleListenerContainer")
 	public void consumeEmailMsg(KillSuccessUserInfo info) {
 		try {
-			log.info("秒杀异步邮件通知-接收消息：{}", info);
+			log.info("秒杀异步邮件通知-接收消息:{}", info.toString());
 
 		} catch (Exception e) {
 			log.error("秒杀异步邮件通知-接收消息-发生异常:", e.fillInStackTrace());

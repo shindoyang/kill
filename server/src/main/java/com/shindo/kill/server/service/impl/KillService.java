@@ -43,20 +43,20 @@ public class KillService implements IKillService {
 			//TODO:查询待秒杀商品详情
 			ItemKill itemKill = itemKillMapper.selectById(killId);
 
-			//TODO:判断是否可以被秒杀cankill=1?
+			//TODO:判断是否可以被秒杀canKill=1?
 			if (itemKill != null && 1 == itemKill.getCanKill()) {
 				//TODO:扣减库存- 减一
 				int res = itemKillMapper.updateKillItem(killId);
 
-				//TODO:扣减是否成功给你？是-生成秒杀成功的订单，同时通知用户秒杀成功的消息
+				//TODO:扣减是否成功？是-生成秒杀成功的订单，同时通知用户秒杀成功的消息
 				if (res > 0) {
 					commonRecordKillSuccessInfo(itemKill, userId);
-					
+
 					result = true;
 				}
 			}
 		} else {
-			throw new Exception("您已经抢购过该商品了！");
+			throw new Exception("您已经抢购过该商品了!");
 		}
 		return result;
 	}
@@ -68,7 +68,7 @@ public class KillService implements IKillService {
 	 * @param userId
 	 * @throws Exception
 	 */
-	public void commonRecordKillSuccessInfo(ItemKill kill, Integer userId) throws Exception {
+	private void commonRecordKillSuccessInfo(ItemKill kill, Integer userId) throws Exception {
 		//TODO:记录抢购成功后生成的秒杀订单记录
 
 		ItemKillSuccess entity = new ItemKillSuccess();

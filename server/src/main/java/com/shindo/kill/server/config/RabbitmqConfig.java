@@ -75,13 +75,13 @@ public class RabbitmqConfig {
 		rabbitTemplate.setConfirmCallback(new RabbitTemplate.ConfirmCallback() {
 			@Override
 			public void confirm(CorrelationData correlationData, boolean ack, String cause) {
-				log.info("消息发送成功：correlationData({}),ack({}),cause({})", correlationData, ack, cause);
+				log.info("消息发送成功:correlationData({}),ack({}),cause({})", correlationData, ack, cause);
 			}
 		});
 		rabbitTemplate.setReturnCallback(new RabbitTemplate.ReturnCallback() {
 			@Override
 			public void returnedMessage(Message message, int replyCode, String replyText, String exchange, String routingKey) {
-				log.warn("消息丢失：exchange({}),route({}),replyCode({}),replyText({}),message:{}", exchange, routingKey, replyCode, replyText);
+				log.warn("消息丢失:exchange({}),route({}),replyCode({}),replyText({}),message:{}", exchange, routingKey, replyCode, replyText, message);
 			}
 		});
 		return rabbitTemplate;
