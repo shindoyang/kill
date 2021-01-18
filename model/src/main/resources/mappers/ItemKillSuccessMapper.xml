@@ -137,4 +137,14 @@
     SET status = -1
     WHERE code = #{code} AND status = 0
   </update>
+
+  <!--批量获取待处理已保存订单 MINUTE:分钟-->
+  <select id="selectExpireOrders" resultType="com.shindo.kill.model.entity.ItemKillSuccess">
+    SELECT
+        a.*,TIMESTAMPDIFF(MINUTE,a.create_time,NOW()) AS diffTime
+    FROM
+        item_kill_success AS a
+    WHERE
+        a.`status` = 0
+  </select>
 </mapper>

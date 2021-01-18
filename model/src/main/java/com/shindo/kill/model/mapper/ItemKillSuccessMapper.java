@@ -4,6 +4,8 @@ import com.shindo.kill.model.dto.KillSuccessUserInfo;
 import com.shindo.kill.model.entity.ItemKillSuccess;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 public interface ItemKillSuccessMapper {
     int deleteByPrimaryKey(String code);
 
@@ -22,5 +24,7 @@ public interface ItemKillSuccessMapper {
     KillSuccessUserInfo selectByCode(@Param("code") String code);
 
     int expireOrder(@Param("code") String code);
+
+    List<ItemKillSuccess> selectExpireOrders();
 
 }

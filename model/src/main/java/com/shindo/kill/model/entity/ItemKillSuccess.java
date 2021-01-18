@@ -1,5 +1,7 @@
 package com.shindo.kill.model.entity;
 
+import lombok.ToString;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -7,6 +9,7 @@ import java.util.Date;
  * item_kill_success
  * @author 
  */
+@ToString
 public class ItemKillSuccess implements Serializable {
     /**
      * 秒杀成功生成的订单编号
@@ -37,6 +40,8 @@ public class ItemKillSuccess implements Serializable {
      * 创建时间
      */
     private Date createTime;
+
+    private Integer diffTime;
 
     private static final long serialVersionUID = 1L;
 
@@ -86,5 +91,13 @@ public class ItemKillSuccess implements Serializable {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
+    }
+
+    public Integer getDiffTime() {
+        return diffTime;
+    }
+
+    public void setDiffTime(Integer diffTime) {
+        this.diffTime = diffTime;
     }
 }
