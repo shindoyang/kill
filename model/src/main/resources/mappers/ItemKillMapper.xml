@@ -48,12 +48,12 @@
 
 
   <!--抢购商品，剩余数量减一-->
-  <!--  <update id="updateKillItem">
+    <update id="updateKillItem">
       UPDATE item_kill
       SET total = total - 1
       WHERE
           id = #{killId}
-    </update>-->
+    </update>
 
 
   <!--获取秒杀详情V2-->

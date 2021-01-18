@@ -13,8 +13,8 @@
     code, item_id, kill_id, user_id, `status`, create_time
   </sql>
   <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List" />
+    select
+    <include refid="Base_Column_List"/>
     from item_kill_success
     where code = #{code,jdbcType=VARCHAR}
   </select>
@@ -22,16 +22,19 @@
     delete from item_kill_success
     where code = #{code,jdbcType=VARCHAR}
   </delete>
-  <insert id="insert" keyColumn="code" keyProperty="code" parameterType="com.shindo.kill.model.entity.ItemKillSuccess" useGeneratedKeys="true">
-    insert into item_kill_success (item_id, kill_id, user_id, 
+  <insert id="insert" parameterType="com.shindo.kill.model.entity.ItemKillSuccess">
+    insert into item_kill_success (code,item_id, kill_id, user_id,
       `status`, create_time)
-    values (#{itemId,jdbcType=INTEGER}, #{killId,jdbcType=INTEGER}, #{userId,jdbcType=VARCHAR}, 
+    values (#{code,jdbcType=VARCHAR},#{itemId,jdbcType=INTEGER}, #{killId,jdbcType=INTEGER}, #{userId,jdbcType=VARCHAR},
       #{status,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" keyColumn="code" keyProperty="code" parameterType="com.shindo.kill.model.entity.ItemKillSuccess" useGeneratedKeys="true">
+  <insert id="insertSelective" parameterType="com.shindo.kill.model.entity.ItemKillSuccess">
     insert into item_kill_success
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="itemId != null">
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="code != null" >
+        code,
+      </if>
+      <if test="itemId != null" >
         item_id,
       </if>
       <if test="killId != null">
@@ -47,8 +50,11 @@
         create_time,
       </if>
     </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="itemId != null">
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="itemId != null" >
         #{itemId,jdbcType=INTEGER},
       </if>
       <if test="killId != null">
@@ -95,4 +101,15 @@
       create_time = #{createTime,jdbcType=TIMESTAMP}
     where code = #{code,jdbcType=VARCHAR}
   </update>
+  <select id="countByKillUserId" resultType="java.lang.Integer">
+    SELECT
+    COUNT(1) AS total
+    FROM
+    item_kill_success
+    WHERE
+    user_id = #{userId}
+    AND kill_id = #{killId}
+    <!-- AND `status` IN (-1, 0) -->
+    AND `status` IN (0)
+  </select>
 </mapper>

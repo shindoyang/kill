@@ -56,4 +56,17 @@ public class KillController {
 		return response;
 	}
 
+	//抢购成功跳转页面
+	@RequestMapping(value = prefix + "/execute/success", method = RequestMethod.GET)
+	public String executeSuccess() {
+		return "executeSuccess";
+	}
+
+	//抢购失败跳转页面
+	@RequestMapping(value = prefix + "/execute/fail", method = RequestMethod.GET)
+	public String executeFail() {
+		return "executeFail";
+	}
+
+
 }

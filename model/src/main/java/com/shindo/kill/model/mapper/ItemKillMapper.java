@@ -14,4 +14,6 @@ public interface ItemKillMapper {
 	List<ItemKill> selectAll();
 
 	ItemKill selectById(@Param("id") Integer id);
+
+	int updateKillItem(@Param("killId") Integer killId);
 }

@@ -73,7 +73,7 @@
         var killId = $("#killId").val();
         var data = {
             "killId": killId,
-            "userId": 1
+            "userId": 10
         };
         /*var data = {
             "killId":killId
