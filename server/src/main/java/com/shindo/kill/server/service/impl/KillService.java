@@ -6,6 +6,7 @@ import com.shindo.kill.model.mapper.ItemKillMapper;
 import com.shindo.kill.model.mapper.ItemKillSuccessMapper;
 import com.shindo.kill.server.enums.SysConstant;
 import com.shindo.kill.server.service.IKillService;
+import com.shindo.kill.server.service.RabbitSenderService;
 import com.shindo.kill.server.utils.RandomUtil;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -27,6 +28,9 @@ public class KillService implements IKillService {
 
 	@Autowired
 	private ItemKillMapper itemKillMapper;
+
+	@Autowired
+	private RabbitSenderService rabbitSenderService;
 
 	/**
 	 * 商品秒杀核心业务逻辑的处理
@@ -69,7 +73,8 @@ public class KillService implements IKillService {
 
 		ItemKillSuccess entity = new ItemKillSuccess();
 
-		entity.setCode(RandomUtil.generateOrderCode());//传统时间戳+N位随机数
+		String orderNo = RandomUtil.generateOrderCode();//传统时间戳+N位随机数
+		entity.setCode(orderNo);
 		entity.setItemId(kill.getItemId());
 		entity.setKillId(kill.getId());
 		entity.setUserId(userId.toString());
@@ -77,5 +82,10 @@ public class KillService implements IKillService {
 		entity.setCreateTime(DateTime.now().toDate());
 
 		int res = itemKillSuccessMapper.insertSelective(entity);
+
+		if (res > 0) {
+			//TODO：进行异步邮件消息的通知=rabbitmq+email
+			rabbitSenderService.sendKillSuccessEmailMsg(orderNo);
+		}
 	}
 }

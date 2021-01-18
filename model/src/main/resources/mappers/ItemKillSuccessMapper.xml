@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.shindo.kill.model.mapper.ItemKillSuccessMapper">
   <resultMap id="BaseResultMap" type="com.shindo.kill.model.entity.ItemKillSuccess">
     <id column="code" jdbcType="VARCHAR" property="code" />
@@ -111,5 +112,18 @@
     AND kill_id = #{killId}
     <!-- AND `status` IN (-1, 0) -->
     AND `status` IN (0)
+  </select>
+  <select id="selectByCode" resultType="com.shindo.kill.model.dto.KillSuccessUserInfo">
+    SELECT
+      a.*,
+      b.user_name,
+      b.phone,
+      b.email,
+      c.name AS itemName
+    FROM item_kill_success AS a
+      LEFT JOIN user b ON b.id = a.user_id
+      LEFT JOIN item c ON c.id = a.item_id
+    WHERE a.code = #{code}
+          AND b.is_active = 1
   </select>
 </mapper>
