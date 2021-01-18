@@ -50,4 +50,13 @@ public class SchedulerService {
 		}
 	}
 
+	/*@Scheduled(cron = "0/11 * * * * ?")
+	public void schedulerExpireOrdersV2() {
+		log.info("v2的定时任务");
+	}
+
+	@Scheduled(cron = "0/10 * * * * ?")
+	public void schedulerExpireOrdersV3() {
+		log.info("v3的定时任务");
+	}*/
 }
