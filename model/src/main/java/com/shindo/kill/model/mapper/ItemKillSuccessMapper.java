@@ -21,4 +21,6 @@ public interface ItemKillSuccessMapper {
 
     KillSuccessUserInfo selectByCode(@Param("code") String code);
 
+    int expireOrder(@Param("code") String code);
+
 }

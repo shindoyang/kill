@@ -102,6 +102,8 @@
       create_time = #{createTime,jdbcType=TIMESTAMP}
     where code = #{code,jdbcType=VARCHAR}
   </update>
+
+  <!--根据秒杀活动跟用户Id查询用户的抢购数量-->
   <select id="countByKillUserId" resultType="java.lang.Integer">
     SELECT
     COUNT(1) AS total
@@ -113,6 +115,8 @@
     <!-- AND `status` IN (-1, 0) -->
     AND `status` IN (0)
   </select>
+
+  <!--根据秒杀成功后的订单编码查询-->
   <select id="selectByCode" resultType="com.shindo.kill.model.dto.KillSuccessUserInfo">
     SELECT
       a.*,
@@ -126,4 +130,11 @@
     WHERE a.code = #{code}
           AND b.is_active = 1
   </select>
+
+  <!--失效更新订单信息-->
+  <update id="expireOrder">
+    UPDATE item_kill_success
+    SET status = -1
+    WHERE code = #{code} AND status = 0
+  </update>
 </mapper>

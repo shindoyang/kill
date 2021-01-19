@@ -25,11 +25,20 @@
             <h2>当前支付的状态：</h2>
             <h2 class="text-danger">
                 <c:choose>
+                    <c:when test="${info.status==0}">
+                        成功(未付款)
+                    </c:when>
                     <c:when test="${info.status==1}">
                         已成功付款
                     </c:when>
+                    <c:when test="${info.status==2}">
+                        已取消
+                    </c:when>
+                    <c:when test="${info.status==-1}">
+                        超时未支付,无效订单
+                    </c:when>
                     <c:otherwise>
-                        未支付或已取消
+                        未知状态
                     </c:otherwise>
                 </c:choose>
             </h2>

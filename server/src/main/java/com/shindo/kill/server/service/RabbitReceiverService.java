@@ -1,6 +1,7 @@
 package com.shindo.kill.server.service;
 
 import com.shindo.kill.model.dto.KillSuccessUserInfo;
+import com.shindo.kill.model.entity.ItemKillSuccess;
 import com.shindo.kill.model.mapper.ItemKillSuccessMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,26 @@ public class RabbitReceiverService {
 		} catch (Exception e) {
 			log.error("秒杀异步邮件通知-接收消息-发生异常:", e.fillInStackTrace());
 		}
+	}
 
+	/**
+	 * 用户秒杀成功后超时未支付-监听者
+	 *
+	 * @param info
+	 */
+	@RabbitListener(queues = {"${mq.kill.item.success.kill.dead.real.queue}"}, containerFactory = "singleListenerContainer")
+	public void consumeExpireOrder(KillSuccessUserInfo info) {
+		try {
+			log.info("用户秒杀成功后超时未支付-监听者-接收消息:{}", info);
+			if (null != info) {
+				ItemKillSuccess entity = itemKillSuccessMapper.selectByPrimaryKey(info.getCode());
+				if (null != entity && entity.getStatus().intValue() == 0) {
+					itemKillSuccessMapper.expireOrder(info.getCode());
+				}
+			}
+		} catch (Exception e) {
+			log.error("用户秒杀成功后超时未支付-监听者-发生异常:", e.fillInStackTrace());
+		}
 	}
 
 }
