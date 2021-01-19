@@ -1,7 +1,9 @@
 package com.shindo.kill.server.controller;
 
+import com.google.common.base.Strings;
 import com.shindo.kill.api.enums.StatusCode;
 import com.shindo.kill.api.response.BaseResponse;
+import com.shindo.kill.model.dto.KillSuccessUserInfo;
 import com.shindo.kill.model.mapper.ItemKillSuccessMapper;
 import com.shindo.kill.server.dto.KillDto;
 import com.shindo.kill.server.service.IKillService;
@@ -10,12 +12,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -54,6 +54,24 @@ public class KillController {
 			response = new BaseResponse(StatusCode.Fail.getCode(), e.getMessage());
 		}
 		return response;
+	}
+
+	//http://localhost:8092/kill/kill/record/detail/202101190823417181238
+
+	/**
+	 * 查看订单详情
+	 */
+	@RequestMapping(value = prefix + "/record/detail/{orderNo}", method = RequestMethod.GET)
+	public String killRecordDetail(@PathVariable String orderNo, ModelMap modelMap) {
+		if (Strings.isNullOrEmpty(orderNo)) {
+			return "error";
+		}
+		KillSuccessUserInfo info = itemKillSuccessMapper.selectByCode(orderNo);
+		if (null == info) {
+			return "error";
+		}
+		modelMap.put("info", info);
+		return "killRecord";
 	}
 
 	//抢购成功跳转页面
