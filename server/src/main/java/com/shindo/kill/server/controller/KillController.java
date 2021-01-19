@@ -56,6 +56,25 @@ public class KillController {
 		return response;
 	}
 
+	@RequestMapping(value = prefix + "/execute/lock", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public BaseResponse excuteLock(@RequestBody @Validated KillDto dto, BindingResult result, HttpSession session) {
+		if (result.hasErrors() || dto.getKillId() <= 0) {
+			return new BaseResponse(StatusCode.InvalidParams);
+		}
+		BaseResponse response = new BaseResponse(StatusCode.Success);
+		try {
+			//不加分布式锁的前提
+			Boolean res = killService.killItem(dto.getKillId(), dto.getUserId());
+			if (!res) {
+				return new BaseResponse(StatusCode.Fail.getCode(), "不加分布式锁~哈哈~商品已抢购完毕或者不在抢购时间段哦！");
+			}
+		} catch (Exception e) {
+			response = new BaseResponse(StatusCode.Fail.getCode(), e.getMessage());
+		}
+		return response;
+	}
+
 	//http://localhost:8092/kill/kill/record/detail/202101190823417181238
 
 	/**
