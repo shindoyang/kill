@@ -39,4 +39,7 @@
 
 #### redis原子操作优化：
 核心方法：SETNX + EXPIRE  联合使用
+原理：Redis本身就是一个基于内存的、单线程的key-value存储数据库
 
+#### redission 分布式锁
+> 参考：https://www.cnblogs.com/cjsblog/p/11273205.html

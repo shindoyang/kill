@@ -70,9 +70,14 @@ public class KillController {
 				return new BaseResponse(StatusCode.Fail.getCode(), "不加分布式锁~哈哈~商品已抢购完毕或者不在抢购时间段哦！");
 			}*/
 			//基于redis的分布式锁进行控制
-			Boolean res = killService.killItemV3(dto.getKillId(), dto.getUserId());
+			/*Boolean res = killService.killItemV3(dto.getKillId(), dto.getUserId());
 			if (!res) {
 				return new BaseResponse(StatusCode.Fail.getCode(), "redis分布式锁~哈哈~商品已抢购完毕或者不在抢购时间段哦！");
+			}*/
+			//基于redission的分布式锁进行控制
+			Boolean res = killService.killItemV4(dto.getKillId(), dto.getUserId());
+			if (!res) {
+				return new BaseResponse(StatusCode.Fail.getCode(), "redission分布式锁~哈哈~商品已抢购完毕或者不在抢购时间段哦！");
 			}
 		} catch (Exception e) {
 			response = new BaseResponse(StatusCode.Fail.getCode(), e.getMessage());

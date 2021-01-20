@@ -10,6 +10,8 @@ import com.shindo.kill.server.service.RabbitSenderService;
 import com.shindo.kill.server.utils.RandomUtil;
 import com.shindo.kill.server.utils.SnowFlake;
 import org.joda.time.DateTime;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,9 @@ public class KillService implements IKillService {
 
 	@Autowired
 	private StringRedisTemplate stringRedisTemplate;
+
+	@Autowired
+	private RedissonClient redissonClient;
 
 	/**
 	 * 商品秒杀核心业务逻辑的处理
@@ -145,7 +150,8 @@ public class KillService implements IKillService {
 		ValueOperations valueOperations = stringRedisTemplate.opsForValue();
 		final String key = new StringBuffer().append(killId).append(userId).append("-RedisLock").toString();
 		final String value = RandomUtil.generateOrderCode();
-		Boolean cacheRes = valueOperations.setIfAbsent(key, value);
+		Boolean cacheRes = valueOperations.setIfAbsent(key, value);//lua脚本提供"分布式锁服务"，就可以写在一起
+		//TODO：redis部署节点宕机了
 		try {
 			if (cacheRes) {
 				if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
@@ -174,6 +180,41 @@ public class KillService implements IKillService {
 				stringRedisTemplate.delete(key);
 			}
 
+		}
+		return result;
+	}
+
+	/**
+	 * 商品秒杀核心业务逻辑的处理-redission分布式锁
+	 */
+	@Override
+	public Boolean killItemV4(Integer killId, Integer userId) throws Exception {
+		Boolean result = false;
+
+		final String lockKey = new StringBuffer().append(killId).append(userId).append("-RedissionLock").toString();
+		RLock lock = redissonClient.getLock(lockKey);
+		try {
+//			lock.lock(120, TimeUnit.SECONDS);//上锁后120秒自动解锁
+			boolean cacheRes = lock.tryLock(30, 10, TimeUnit.SECONDS);
+			if (cacheRes) {
+				//TODO:核心业务逻辑处理
+				if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
+					ItemKill itemKill = itemKillMapper.selectByIdV2(killId);
+					if (itemKill != null && 1 == itemKill.getCanKill() && itemKill.getTotal() > 0) {
+						int res = itemKillMapper.updateKillItemV2(killId);
+						if (res > 0) {
+							commonRecordKillSuccessInfo(itemKill, userId);
+							result = true;
+						}
+					}
+				} else {
+					throw new Exception("Redission-您已经抢购过该商品了!");
+				}
+			}
+
+		} finally {
+			lock.unlock();
+//			lock.forceUnlock(); //强制释放
 		}
 		return result;
 	}
