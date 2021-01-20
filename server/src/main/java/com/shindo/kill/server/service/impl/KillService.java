@@ -83,15 +83,47 @@ public class KillService implements IKillService {
 		entity.setUserId(userId.toString());
 		entity.setStatus(SysConstant.OrderStatus.SuccessNotPayed.getCode().byteValue());
 		entity.setCreateTime(DateTime.now().toDate());
+		//TODO:举一反三，参考单例模式的双重检查锁
+		//TODO:再次判断当前用户是否已经抢购过当前商品
+		if (itemKillSuccessMapper.countByKillUserId(kill.getId(), userId) <= 0) {
+			int res = itemKillSuccessMapper.insertSelective(entity);
 
-		int res = itemKillSuccessMapper.insertSelective(entity);
+			if (res > 0) {
+				//TODO：进行异步邮件消息的通知=rabbitmq+email
+				rabbitSenderService.sendKillSuccessEmailMsg(orderNo);
 
-		if (res > 0) {
-			//TODO：进行异步邮件消息的通知=rabbitmq+email
-			rabbitSenderService.sendKillSuccessEmailMsg(orderNo);
-
-			//TODO:入死信队列，用于"失效"超过指定的TTL时间仍然未支付的订单(TTL:time to live 存活时间)
-			rabbitSenderService.sendKillSuccessOrderExpireMsg(orderNo);
+				//TODO:入死信队列，用于"失效"超过指定的TTL时间仍然未支付的订单(TTL:time to live 存活时间)
+				rabbitSenderService.sendKillSuccessOrderExpireMsg(orderNo);
+			}
 		}
+	}
+
+	/**
+	 * 商品秒杀核心业务逻辑的处理
+	 */
+	@Override
+	public Boolean killItemV2(Integer killId, Integer userId) throws Exception {
+		Boolean result = false;
+		//TODO:判断当前用户是否已经抢购过当前商品
+		if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
+			//TODO:A.查询待秒杀商品详情
+			ItemKill itemKill = itemKillMapper.selectByIdV2(killId);
+
+			//TODO:判断是否可以被秒杀canKill=1?
+			if (itemKill != null && 1 == itemKill.getCanKill() && itemKill.getTotal() > 0) {
+				//TODO:B.扣减库存- 减一
+				int res = itemKillMapper.updateKillItemV2(killId);
+
+				//TODO:扣减是否成功？是-生成秒杀成功的订单，同时通知用户秒杀成功的消息
+				if (res > 0) {
+					commonRecordKillSuccessInfo(itemKill, userId);
+
+					result = true;
+				}
+			}
+		} else {
+			throw new Exception("您已经抢购过该商品了!");
+		}
+		return result;
 	}
 }

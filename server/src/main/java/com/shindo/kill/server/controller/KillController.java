@@ -65,7 +65,7 @@ public class KillController {
 		BaseResponse response = new BaseResponse(StatusCode.Success);
 		try {
 			//不加分布式锁的前提
-			Boolean res = killService.killItem(dto.getKillId(), dto.getUserId());
+			Boolean res = killService.killItemV2(dto.getKillId(), dto.getUserId());
 			if (!res) {
 				return new BaseResponse(StatusCode.Fail.getCode(), "不加分布式锁~哈哈~商品已抢购完毕或者不在抢购时间段哦！");
 			}
