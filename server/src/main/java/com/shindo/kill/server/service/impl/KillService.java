@@ -141,18 +141,18 @@ public class KillService implements IKillService {
 	@Override
 	public Boolean killItemV3(Integer killId, Integer userId) throws Exception {
 		Boolean result = false;
-
-		if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
-			//TODO:借助Redis的原子操作实现分布式锁-对共享操作-资源进行控制
-			ValueOperations valueOperations = stringRedisTemplate.opsForValue();
-			final String key = new StringBuffer().append(killId).append(userId).append("-RedisLock").toString();
-			final String value = RandomUtil.generateOrderCode();
-			Boolean cacheRes = valueOperations.setIfAbsent(key, value);
+		//TODO:借助Redis的原子操作实现分布式锁-对共享操作-资源进行控制
+		ValueOperations valueOperations = stringRedisTemplate.opsForValue();
+		final String key = new StringBuffer().append(killId).append(userId).append("-RedisLock").toString();
+		final String value = RandomUtil.generateOrderCode();
+		Boolean cacheRes = valueOperations.setIfAbsent(key, value);
+		try {
 			if (cacheRes) {
-				//TODO:设置key失效时间,防止后面的后面的逻辑出现异常，无法删除key，但是过期时间一定要设置大于业务执行时间，不然后续业务没处理完毕就删除了，还是会有并发问题。
-				stringRedisTemplate.expire(key, 300, TimeUnit.SECONDS);
+				if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
 
-				try {
+					//TODO:设置key失效时间,防止后面的后面的逻辑出现异常，无法删除key，但是过期时间一定要设置大于业务执行时间，不然后续业务没处理完毕就删除了，还是会有并发问题。
+					stringRedisTemplate.expire(key, 120, TimeUnit.SECONDS);
+
 					ItemKill itemKill = itemKillMapper.selectByIdV2(killId);
 					if (itemKill != null && 1 == itemKill.getCanKill() && itemKill.getTotal() > 0) {
 						int res = itemKillMapper.updateKillItemV2(killId);
@@ -163,17 +163,17 @@ public class KillService implements IKillService {
 							result = true;
 						}
 					}
-				} catch (Exception e) {
-					throw new Exception("还没到请购日期、已过了抢购时间或已被抢购完毕！");
-				} finally {
-					if (value.equals(valueOperations.get(key))) {
-						stringRedisTemplate.delete(key);
-					}
+				} else {
+					throw new Exception("Redis-您已经抢购过该商品了!");
 				}
 			}
+		} catch (Exception e) {
+			throw new Exception("还没到请购日期、已过了抢购时间或已被抢购完毕！");
+		} finally {
+			if (value.equals(valueOperations.get(key))) {
+				stringRedisTemplate.delete(key);
+			}
 
-		} else {
-			throw new Exception("Redis-您已经抢购过该商品了!");
 		}
 		return result;
 	}
