@@ -7,12 +7,17 @@ import com.shindo.kill.model.mapper.ItemKillSuccessMapper;
 import com.shindo.kill.server.enums.SysConstant;
 import com.shindo.kill.server.service.IKillService;
 import com.shindo.kill.server.service.RabbitSenderService;
+import com.shindo.kill.server.utils.RandomUtil;
 import com.shindo.kill.server.utils.SnowFlake;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Description:
@@ -33,6 +38,9 @@ public class KillService implements IKillService {
 
 	@Autowired
 	private RabbitSenderService rabbitSenderService;
+
+	@Autowired
+	private StringRedisTemplate stringRedisTemplate;
 
 	/**
 	 * 商品秒杀核心业务逻辑的处理
@@ -72,7 +80,6 @@ public class KillService implements IKillService {
 	 */
 	private void commonRecordKillSuccessInfo(ItemKill kill, Integer userId) throws Exception {
 		//TODO:记录抢购成功后生成的秒杀订单记录
-
 		ItemKillSuccess entity = new ItemKillSuccess();
 		String orderNo = String.valueOf(snowFlake.nextId());
 
@@ -86,6 +93,7 @@ public class KillService implements IKillService {
 		//TODO:举一反三，参考单例模式的双重检查锁
 		//TODO:再次判断当前用户是否已经抢购过当前商品
 		if (itemKillSuccessMapper.countByKillUserId(kill.getId(), userId) <= 0) {
+			log.info("生成秒杀订单 ThreadId:{}", Thread.currentThread().getId());
 			int res = itemKillSuccessMapper.insertSelective(entity);
 
 			if (res > 0) {
@@ -99,7 +107,7 @@ public class KillService implements IKillService {
 	}
 
 	/**
-	 * 商品秒杀核心业务逻辑的处理
+	 * 商品秒杀核心业务逻辑的处理-Mysql优化
 	 */
 	@Override
 	public Boolean killItemV2(Integer killId, Integer userId) throws Exception {
@@ -123,6 +131,49 @@ public class KillService implements IKillService {
 			}
 		} else {
 			throw new Exception("您已经抢购过该商品了!");
+		}
+		return result;
+	}
+
+	/**
+	 * 商品秒杀核心业务逻辑的处理-redis的分布式锁
+	 */
+	@Override
+	public Boolean killItemV3(Integer killId, Integer userId) throws Exception {
+		Boolean result = false;
+
+		if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
+			//TODO:借助Redis的原子操作实现分布式锁-对共享操作-资源进行控制
+			ValueOperations valueOperations = stringRedisTemplate.opsForValue();
+			final String key = new StringBuffer().append(killId).append(userId).append("-RedisLock").toString();
+			final String value = RandomUtil.generateOrderCode();
+			Boolean cacheRes = valueOperations.setIfAbsent(key, value);
+			if (cacheRes) {
+				//TODO:设置key失效时间,防止后面的后面的逻辑出现异常，无法删除key，但是过期时间一定要设置大于业务执行时间，不然后续业务没处理完毕就删除了，还是会有并发问题。
+				stringRedisTemplate.expire(key, 300, TimeUnit.SECONDS);
+
+				try {
+					ItemKill itemKill = itemKillMapper.selectByIdV2(killId);
+					if (itemKill != null && 1 == itemKill.getCanKill() && itemKill.getTotal() > 0) {
+						int res = itemKillMapper.updateKillItemV2(killId);
+						log.info("扣减库存 ThreadId:{}", Thread.currentThread().getId());
+						if (res > 0) {
+							commonRecordKillSuccessInfo(itemKill, userId);
+
+							result = true;
+						}
+					}
+				} catch (Exception e) {
+					throw new Exception("还没到请购日期、已过了抢购时间或已被抢购完毕！");
+				} finally {
+					if (value.equals(valueOperations.get(key))) {
+						stringRedisTemplate.delete(key);
+					}
+				}
+			}
+
+		} else {
+			throw new Exception("Redis-您已经抢购过该商品了!");
 		}
 		return result;
 	}

@@ -32,7 +32,7 @@ public class SchedulerService {
 	 */
 	@Scheduled(cron = "0/10 * * * * ?")
 	public void schedulerExpireOrders() {
-		log.info("v1的定时任务");
+//		log.info("v1的定时任务");
 
 		try {
 			List<ItemKillSuccess> list = itemKillSuccessMapper.selectExpireOrders();
