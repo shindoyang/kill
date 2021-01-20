@@ -7,7 +7,7 @@ import com.shindo.kill.model.mapper.ItemKillSuccessMapper;
 import com.shindo.kill.server.enums.SysConstant;
 import com.shindo.kill.server.service.IKillService;
 import com.shindo.kill.server.service.RabbitSenderService;
-import com.shindo.kill.server.utils.RandomUtil;
+import com.shindo.kill.server.utils.SnowFlake;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class KillService implements IKillService {
 	private static final Logger log = LoggerFactory.getLogger(KillService.class);
+
+	private SnowFlake snowFlake = new SnowFlake(2, 3);
 
 	@Autowired
 	private ItemKillSuccessMapper itemKillSuccessMapper;
@@ -72,9 +74,10 @@ public class KillService implements IKillService {
 		//TODO:记录抢购成功后生成的秒杀订单记录
 
 		ItemKillSuccess entity = new ItemKillSuccess();
+		String orderNo = String.valueOf(snowFlake.nextId());
 
-		String orderNo = RandomUtil.generateOrderCode();//传统时间戳+N位随机数
-		entity.setCode(orderNo);
+//		entity.setCode(RandomUtil.generateOrderCode());//传统时间戳+N位随机数
+		entity.setCode(orderNo);//雪花算法
 		entity.setItemId(kill.getItemId());
 		entity.setKillId(kill.getId());
 		entity.setUserId(userId.toString());
