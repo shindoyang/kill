@@ -43,3 +43,24 @@
 
 #### redission 分布式锁
 > 参考：https://www.cnblogs.com/cjsblog/p/11273205.html
+
+强大一：提供的功能不仅仅包含了redis所提供的，还提供了诸如延迟队列（和RabbitMQ的死信队列类似）、分布式服务、多种分布式对象等！
+
+强大二：很亲民（很多组件是基于JavaSE核心知识体系中的数据结构来提供服务的，面向redis实现）
+
+#### zookeeper 分布式锁
+
+采用临时有序的节点
+
+InterProcessMutex:进程互斥锁
+
+
+
+
+
+
+
+
+
+
+

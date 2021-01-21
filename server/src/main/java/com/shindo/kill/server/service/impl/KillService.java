@@ -9,6 +9,8 @@ import com.shindo.kill.server.service.IKillService;
 import com.shindo.kill.server.service.RabbitSenderService;
 import com.shindo.kill.server.utils.RandomUtil;
 import com.shindo.kill.server.utils.SnowFlake;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.joda.time.DateTime;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -32,6 +34,8 @@ public class KillService implements IKillService {
 
 	private SnowFlake snowFlake = new SnowFlake(2, 3);
 
+	private static final String pathPrefix = "/kill/zkLock";
+
 	@Autowired
 	private ItemKillSuccessMapper itemKillSuccessMapper;
 
@@ -46,6 +50,9 @@ public class KillService implements IKillService {
 
 	@Autowired
 	private RedissonClient redissonClient;
+
+	@Autowired
+	private CuratorFramework curatorFramework;
 
 	/**
 	 * 商品秒杀核心业务逻辑的处理
@@ -195,6 +202,12 @@ public class KillService implements IKillService {
 		RLock lock = redissonClient.getLock(lockKey);
 		try {
 //			lock.lock(120, TimeUnit.SECONDS);//上锁后120秒自动解锁
+			/**
+			 * lock.tryLock(long waitTime, long leaseTime, TimeUnit unit)
+			 * waitTime:获取锁的最大等待时间
+			 * leaseTime:活得锁之后的持有时间，时间到就主动释放锁
+			 * TimeUnit:时间单位，秒（也可以是其他时间，按实际情况选择）
+			 */
 			boolean cacheRes = lock.tryLock(30, 10, TimeUnit.SECONDS);
 			if (cacheRes) {
 				//TODO:核心业务逻辑处理
@@ -216,6 +229,49 @@ public class KillService implements IKillService {
 			lock.unlock();
 //			lock.forceUnlock(); //强制释放
 		}
+		return result;
+	}
+
+	/**
+	 * 商品秒杀核心业务逻辑的处理-基于zookeeper分布式锁
+	 */
+	@Override
+	public Boolean killItemV5(Integer killId, Integer userId) throws Exception {
+		Boolean result = false;
+
+		InterProcessMutex mutex = new InterProcessMutex(curatorFramework, pathPrefix + killId + userId + "-lock");
+		try {
+			/**
+			 * 获取互斥锁-阻止，直到可用或给定时间到期为止。 注意：同一线程可以重新调用获取。 每个获取返回true的调用都必须通过调用release()来平衡
+			 * mutex.acquire(long time, TimeUnit unit)
+			 * time:等待的时间
+			 * unit:时间单位
+			 */
+			if (mutex.acquire(10L, TimeUnit.SECONDS)) {
+
+				//TODO:核心业务逻辑
+				if (itemKillSuccessMapper.countByKillUserId(killId, userId) <= 0) {
+					ItemKill itemKill = itemKillMapper.selectByIdV2(killId);
+					if (itemKill != null && 1 == itemKill.getCanKill() && itemKill.getTotal() > 0) {
+						int res = itemKillMapper.updateKillItemV2(killId);
+						if (res > 0) {
+							commonRecordKillSuccessInfo(itemKill, userId);
+
+							result = true;
+						}
+					}
+				} else {
+					throw new Exception("zookeeper-您已经抢购过该商品了!");
+				}
+			}
+		} catch (Exception e) {
+			throw new Exception("还没到抢购日期、已过了抢购时间或已被抢购完毕！");
+		} finally {
+			if (mutex != null) {
+				mutex.release();
+			}
+		}
+
 		return result;
 	}
 }
