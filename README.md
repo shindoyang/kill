@@ -1,9 +1,22 @@
 # kill
 基于微服务SpringBoot的商城高并发抢单系统  实战
 
+## 纸上得来终觉浅，绝知此事要躬行
+
 使用IDEA 插件：Mybatis Generator Plus 对数据库做逆向工程，可参考：https://www.cnblogs.com/personsiglewine/p/12848595.html
 
-### 死信队列处理失效订单的缺陷：
+#### 订单编号生成
+1. 传统方式:时间戳+N位流水号（UUID也是一个道理）构成 （UUID相对较长，而且无序）
+2. twitter的雪花算法:高效率生成分布式唯一ID的最佳方式：https://github.com/souyunku/SnowFlake
+
+比较：
+1. 传统的方式要么太长，没法排序，要么依赖中间件
+2. 雪花算法（整体上按照时间自增排序，并且整个分布式系统内不会产生ID碰撞，高效率）
+
+#### 站在用户的角度上使用自己的系统：Take User As Fool!!!
+
+#### RabbitMQ实现消息异步发送 
+死信队列处理失效订单的缺陷：
 
 有许多订单在某个TTL时间点集中失效,但是恰好RabbitMQ服务挂了。
 
@@ -15,7 +28,7 @@
 
 基于@Scheduled注解的定时任务实现-批量获取status=0的订单并判断时间超过了TTL
 但是@Scheduled只适用与单体架构，在分布式应用场景，应该采用分布式任务调度平台，如：xxl-job, elastic-job-lite
- 
+Scheduled 需要结合线程池一起使用，避免单一线程处理多个任务调度的缺陷，支持多线程处理
 
 #### 超卖问题：
 没有控制好多个线程对于共享的数据、共享的代码进行控制
