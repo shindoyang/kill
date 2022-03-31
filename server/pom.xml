@@ -13,7 +13,7 @@
 
     <properties>
         <start-class>com.shindo.kill.server.MainApplication</start-class>
-        <spring-boot.version>1.5.7.RELEASE</spring-boot.version>
+        <spring-boot.version>2.5.12</spring-boot.version>
         <spring-session.version>1.2.0.REALEASE</spring-session.version>
         <sl4j.version>1.7.13</sl4j.version>
         <log4j.version>1.2.17</log4j.version>
